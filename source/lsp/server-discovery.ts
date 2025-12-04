@@ -142,6 +142,26 @@ const KNOWN_SERVERS: LanguageServerDefinition[] = [
 		verificationMethod: 'version',
 		installHint: 'Install from https://github.com/LuaLS/lua-language-server',
 	},
+	// Dockerfile
+	{
+		name: 'docker-langserver',
+		command: 'docker-langserver',
+		args: ['--stdio'],
+		languages: ['dockerfile'],
+		checkCommand: 'docker-langserver --version',
+		verificationMethod: 'version',
+		installHint: 'npm install -g dockerfile-language-server-nodejs',
+	},
+	// Docker Compose (using YAML language server with JSON schema support)
+	{
+		name: 'yaml-language-server',
+		command: 'yaml-language-server',
+		args: ['--stdio'],
+		languages: ['docker-compose', 'yaml', 'yml'],
+		checkCommand: 'yaml-language-server --version',
+		verificationMethod: 'lsp',
+		installHint: 'npm install -g yaml-language-server',
+	},
 ];
 
 /**
@@ -344,6 +364,8 @@ export function getLanguageId(extension: string): string {
 		swift: 'swift',
 		rb: 'ruby',
 		php: 'php',
+		'dockerfile': 'dockerfile',
+		'docker-compose': 'docker-compose',
 	};
 
 	return languageMap[ext] || ext;

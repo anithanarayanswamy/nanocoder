@@ -167,6 +167,14 @@ test('getLanguageId - returns php for php extension', t => {
 	t.is(getLanguageId('php'), 'php');
 });
 
+test('getLanguageId - returns dockerfile for dockerfile extension', t => {
+	t.is(getLanguageId('dockerfile'), 'dockerfile');
+});
+
+test('getLanguageId - returns docker-compose for docker-compose extension', t => {
+	t.is(getLanguageId('docker-compose'), 'docker-compose');
+});
+
 test('getLanguageId - handles extension with leading dot', t => {
 	t.is(getLanguageId('.ts'), 'typescript');
 });
@@ -446,6 +454,25 @@ test('getKnownServersStatus - includes lua server', t => {
 	const luaServer = result.find(s => s.name === 'lua-language-server');
 	t.truthy(luaServer);
 	t.true(luaServer!.languages.includes('lua'));
+});
+
+test('getKnownServersStatus - includes docker language servers', t => {
+	const result = getKnownServersStatus();
+	const dockerfileServer = result.find(s => s.name === 'docker-langserver');
+	const dockerComposeServer = result.find(s => s.name === 'yaml-language-server' && s.languages.includes('docker-compose'));
+
+	t.truthy(dockerfileServer);
+	if (dockerfileServer) {
+		t.true(dockerfileServer.languages.includes('dockerfile'));
+		t.true(dockerfileServer.installHint!.includes('dockerfile-language-server-nodejs'));
+	}
+
+	t.truthy(dockerComposeServer);
+	if (dockerComposeServer) {
+		t.true(dockerComposeServer.languages.includes('docker-compose'));
+		t.true(dockerComposeServer.languages.includes('yaml'));
+		t.true(dockerComposeServer.languages.includes('yml'));
+	}
 });
 
 // Edge cases
