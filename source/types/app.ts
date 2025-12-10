@@ -13,11 +13,12 @@ export interface MessageSubmissionOptions {
 	onEnterModelSelectionMode: () => void;
 	onEnterProviderSelectionMode: () => void;
 	onEnterThemeSelectionMode: () => void;
-	onEnterRecommendationsMode: () => void;
+	onEnterModelDatabaseMode: () => void;
 	onEnterConfigWizardMode: () => void;
 	onShowStatus: () => void;
 	onHandleChatMessage: (message: string) => Promise<void>;
 	onAddToChatQueue: (component: React.ReactNode) => void;
+	onCommandComplete?: () => void;
 	componentKeyCounter: number;
 	setMessages: (messages: Message[]) => void;
 	messages: Message[];

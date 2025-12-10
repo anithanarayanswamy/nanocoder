@@ -249,7 +249,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 			{
 				name: 'model',
 				prompt: 'Model name(s) (comma-separated)',
-				default: 'glm-4.6',
+				default: 'glm-4.6, glm-4.5-air',
 				required: true,
 			},
 		],
@@ -282,7 +282,7 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 			{
 				name: 'model',
 				prompt: 'Model name(s) (comma-separated)',
-				default: 'glm-4.6',
+				default: 'glm-4.6, glm-4.5-air',
 				required: true,
 			},
 		],
@@ -321,6 +321,38 @@ export const PROVIDER_TEMPLATES: ProviderTemplate[] = [
 		buildConfig: answers => ({
 			name: answers.providerName || 'GitHub Models',
 			baseUrl: 'https://models.github.ai/inference',
+			apiKey: answers.apiKey,
+			models: answers.model
+				.split(',')
+				.map(m => m.trim())
+				.filter(Boolean),
+		}),
+	},
+	{
+		id: 'poe',
+		name: 'Poe',
+		fields: [
+			{
+				name: 'apiKey',
+				prompt: 'API Key (from poe.com/api_key)',
+				required: true,
+				sensitive: true,
+			},
+			{
+				name: 'model',
+				prompt: 'Model name(s) (comma-separated)',
+				default: 'Claude-Sonnet-4, GPT-4o, Gemini-2.5-Pro',
+				required: true,
+			},
+			{
+				name: 'providerName',
+				prompt: 'Provider name',
+				default: 'Poe',
+			},
+		],
+		buildConfig: answers => ({
+			name: answers.providerName || 'Poe',
+			baseUrl: 'https://api.poe.com/v1',
 			apiKey: answers.apiKey,
 			models: answers.model
 				.split(',')

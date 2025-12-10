@@ -1,5 +1,12 @@
 import {useState, useCallback, useMemo, useEffect} from 'react';
-import {LLMClient, Message, DevelopmentMode, ToolCall} from '@/types/core';
+import {
+	LLMClient,
+	Message,
+	DevelopmentMode,
+	ToolCall,
+	MCPConnectionStatus,
+	LSPConnectionStatus,
+} from '@/types/core';
 import {ToolManager} from '@/tools/tool-manager';
 import {CustomCommandLoader} from '@/custom-commands/loader';
 import {CustomCommandExecutor} from '@/custom-commands/executor';
@@ -45,9 +52,22 @@ export function useAppState() {
 	const [mcpInitialized, setMcpInitialized] = useState<boolean>(false);
 	const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
 
-	// Thinking indicator state
-	const [isThinking, setIsThinking] = useState<boolean>(false);
+	// Connection status states
+	const [mcpServersStatus, setMcpServersStatus] = useState<
+		MCPConnectionStatus[]
+	>([]);
+	const [lspServersStatus, setLspServersStatus] = useState<
+		LSPConnectionStatus[]
+	>([]);
+
+	// Initialization status states
+	const [preferencesLoaded, setPreferencesLoaded] = useState<boolean>(false);
+	const [customCommandsCount, setCustomCommandsCount] = useState<number>(0);
+
+	// Cancelling indicator state
 	const [isCancelling, setIsCancelling] = useState<boolean>(false);
+	const [isConversationComplete, setIsConversationComplete] =
+		useState<boolean>(false);
 
 	// Cancellation state
 	const [abortController, setAbortController] =
@@ -60,7 +80,7 @@ export function useAppState() {
 		useState<boolean>(false);
 	const [isThemeSelectionMode, setIsThemeSelectionMode] =
 		useState<boolean>(false);
-	const [isRecommendationsMode, setIsRecommendationsMode] =
+	const [isModelDatabaseMode, setIsModelDatabaseMode] =
 		useState<boolean>(false);
 	const [isConfigWizardMode, setIsConfigWizardMode] = useState<boolean>(false);
 	const [isToolConfirmationMode, setIsToolConfirmationMode] =
@@ -179,13 +199,17 @@ export function useAppState() {
 		startChat,
 		mcpInitialized,
 		updateInfo,
-		isThinking,
+		mcpServersStatus,
+		lspServersStatus,
+		preferencesLoaded,
+		customCommandsCount,
 		isCancelling,
+		isConversationComplete,
 		abortController,
 		isModelSelectionMode,
 		isProviderSelectionMode,
 		isThemeSelectionMode,
-		isRecommendationsMode,
+		isModelDatabaseMode,
 		isConfigWizardMode,
 		isToolConfirmationMode,
 		isToolExecuting,
@@ -215,13 +239,17 @@ export function useAppState() {
 		setStartChat,
 		setMcpInitialized,
 		setUpdateInfo,
-		setIsThinking,
+		setMcpServersStatus,
+		setLspServersStatus,
+		setPreferencesLoaded,
+		setCustomCommandsCount,
 		setIsCancelling,
+		setIsConversationComplete,
 		setAbortController,
 		setIsModelSelectionMode,
 		setIsProviderSelectionMode,
 		setIsThemeSelectionMode,
-		setIsRecommendationsMode,
+		setIsModelDatabaseMode,
 		setIsConfigWizardMode,
 		setIsToolConfirmationMode,
 		setIsToolExecuting,

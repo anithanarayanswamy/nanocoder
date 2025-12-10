@@ -8,6 +8,7 @@ import {confDirMap} from '@/config/index';
 import {themes, getThemeColors} from '@/config/themes';
 import type {ThemePreset} from '@/types/ui';
 import type {UpdateInfo} from '@/types/utils';
+import type {MCPConnectionStatus, LSPConnectionStatus} from '@/types/core';
 
 // Get CWD once at module load time
 const cwd = process.cwd();
@@ -20,18 +21,42 @@ export default memo(function Status({
 	theme,
 	updateInfo,
 	agentsMdLoaded,
+	mcpServersStatus,
+	lspServersStatus,
+	customCommandsCount,
+	preferencesLoaded,
 }: {
 	provider: string;
 	model: string;
 	theme: ThemePreset;
 	updateInfo?: UpdateInfo | null;
 	agentsMdLoaded?: boolean;
+	mcpServersStatus?: MCPConnectionStatus[];
+	lspServersStatus?: LSPConnectionStatus[];
+	customCommandsCount?: number;
+	preferencesLoaded?: boolean;
 }) {
 	const {boxWidth, isNarrow, truncatePath} = useResponsiveTerminal();
 	const colors = getThemeColors(theme);
 
 	// Check for AGENTS.md synchronously if not provided
 	const hasAgentsMd = agentsMdLoaded ?? existsSync(`${cwd}/AGENTS.md`);
+
+	// Connection status calculations
+	const mcpStatus = mcpServersStatus || [];
+	const lspStatus = lspServersStatus || [];
+	const mcpConnected = mcpStatus.filter(s => s.status === 'connected').length;
+	const lspConnected = lspStatus.filter(s => s.status === 'connected').length;
+	const mcpTotal = mcpStatus.length;
+	const lspTotal = lspStatus.length;
+
+	// Get status color
+	const getStatusColor = (connected: number, total: number) => {
+		if (total === 0) return colors.secondary;
+		if (connected === total) return colors.success;
+		if (connected > 0) return colors.warning;
+		return colors.error;
+	};
 
 	// Calculate max path length based on terminal size
 	const maxPathLength = isNarrow ? 30 : 60;
@@ -67,6 +92,38 @@ export default memo(function Status({
 					) : (
 						<Text color={colors.secondary} italic>
 							✗ No AGENTS.md
+						</Text>
+					)}
+					{preferencesLoaded && (
+						<Text color={colors.secondary}>✓ Preferences loaded</Text>
+					)}
+					{customCommandsCount !== undefined && customCommandsCount > 0 && (
+						<Text color={colors.secondary}>
+							✓ {customCommandsCount} custom commands
+						</Text>
+					)}
+					{mcpTotal > 0 && (
+						<Text
+							color={
+								mcpConnected === mcpTotal
+									? colors.secondary
+									: getStatusColor(mcpConnected, mcpTotal)
+							}
+						>
+							{mcpConnected === mcpTotal ? '✓ ' : ''}MCP: {mcpConnected}/
+							{mcpTotal} connected
+						</Text>
+					)}
+					{lspTotal > 0 && (
+						<Text
+							color={
+								lspConnected === lspTotal
+									? colors.secondary
+									: getStatusColor(lspConnected, lspTotal)
+							}
+						>
+							{lspConnected === lspTotal ? '✓ ' : ''}LSP: {lspConnected}/
+							{lspTotal} connected
 						</Text>
 					)}
 					{updateInfo?.hasUpdate && (
@@ -124,6 +181,66 @@ export default memo(function Status({
 							↳ No AGENTS.md file found, run `/init` to initialize this
 							directory
 						</Text>
+					)}
+					{preferencesLoaded && (
+						<Text color={colors.secondary}>✓ Preferences loaded</Text>
+					)}
+					{customCommandsCount !== undefined && customCommandsCount > 0 && (
+						<Text color={colors.secondary}>
+							✓ {customCommandsCount} custom commands loaded
+						</Text>
+					)}
+					{mcpTotal > 0 && (
+						<Box flexDirection="column">
+							<Text
+								color={
+									mcpConnected === mcpTotal
+										? colors.secondary
+										: getStatusColor(mcpConnected, mcpTotal)
+								}
+							>
+								{mcpConnected === mcpTotal ? '✓ ' : ''}MCP: {mcpConnected}/
+								{mcpTotal} connected
+							</Text>
+							{mcpConnected < mcpTotal && (
+								<Box flexDirection="column" marginLeft={2}>
+									{mcpStatus
+										.filter(s => s.status === 'failed')
+										.map(server => (
+											<Text key={server.name} color={colors.error}>
+												• {server.name}:{' '}
+												{server.errorMessage || 'Connection failed'}
+											</Text>
+										))}
+								</Box>
+							)}
+						</Box>
+					)}
+					{lspTotal > 0 && (
+						<Box flexDirection="column">
+							<Text
+								color={
+									lspConnected === lspTotal
+										? colors.secondary
+										: getStatusColor(lspConnected, lspTotal)
+								}
+							>
+								{lspConnected === lspTotal ? '✓ ' : ''}LSP: {lspConnected}/
+								{lspTotal} connected
+							</Text>
+							{lspConnected < lspTotal && (
+								<Box flexDirection="column" marginLeft={2}>
+									{lspStatus
+										.filter(s => s.status === 'failed')
+										.map(server => (
+											<Text key={server.name} color={colors.error}>
+												• {server.name}:{' '}
+												{server.errorMessage || 'Connection failed'}
+											</Text>
+										))}
+								</Box>
+							)}
+						</Box>
 					)}
 					{updateInfo?.hasUpdate && (
 						<>

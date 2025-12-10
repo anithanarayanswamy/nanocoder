@@ -50,16 +50,8 @@ export function detectMalformedJSONToolCall(
 /**
  * Generates correct format examples for JSON error messages
  */
-function getCorrectJSONFormatExamples(specificHint: string): string {
-	return `${specificHint}
-
-Correct format:
-{
-  "name": "tool_name",
-  "arguments": {
-    "param": "value"
-  }
-}`;
+function getCorrectJSONFormatExamples(_specificHint: string): string {
+	return `Please use the native tool calling format provided by the system. The tools are already available to you - call them directly using the function calling interface.`;
 }
 
 /**
@@ -236,13 +228,19 @@ export function cleanJSONToolCalls(
 	];
 
 	for (const pattern of toolCallPatterns) {
-		cleanedContent = cleanedContent.replace(pattern, '').trim();
+		cleanedContent = cleanedContent.replace(pattern, '');
 	}
 
-	// Clean up extra whitespace and newlines
+	// Clean up whitespace artifacts left by removed tool calls
 	cleanedContent = cleanedContent
-		.replace(/\n\s*\n\s*\n/g, '\n\n') // Reduce multiple newlines to double
-		.replace(/^\s*\n+|\n+\s*$/g, '') // Remove leading/trailing newlines
+		// Remove trailing whitespace from each line
+		.replace(/[ \t]+$/gm, '')
+		// Collapse multiple spaces (but not at start of line for indentation)
+		.replace(/([^ \t\n]) {2,}/g, '$1 ')
+		// Remove lines that are only whitespace
+		.replace(/^[ \t]+$/gm, '')
+		// Collapse 2+ consecutive blank lines to a single blank line
+		.replace(/\n{3,}/g, '\n\n')
 		.trim();
 
 	return cleanedContent;
